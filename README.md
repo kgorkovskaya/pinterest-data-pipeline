@@ -10,17 +10,31 @@
 
 ## Description
 
-Pinterest Data Pipeline project for AiCore. This project aims to recreate the data analytics used by Pinterest, using AWS Cloud tools. 
+This project is the Pinterest Data Pipeline for AiCore, aiming to replicate Pinterest's data analytics infrastructure using AWS Cloud tools.
 
 ## Installation instructions
-- Set up a Kafka client machine. Connect to an EC2 instance and install Kafka. Set up IAM authentication on the EC2 instance to ensure MSK can authenticate the EC2 instance (install the IAM MSK authentication package; set CLASSPATH to store the location of package .jar file; modify the client.properties file on the EC2 instance to configure the EC2 instance to use AWS IAM authentication to the cluster).
-- Create Kafka topics on the client machine (the EC2 instance created in the previous step): 
-    - <user_id>.pin: contains data about Pinterest posts
-    - <user_id>.geo: contains data about geolocation of each post
-    - <user_id>.user: contains data about users that uploaded each post
-- Connect the MSK cluster to an S3 bucket. Use a sink connector, so any data going through the cluster will be automatically written to the S3 bucket. 
-    - First create a custom plugin via the MSK Connect console (use the Confluent.io Amazon S3 connector). 
-    - Then create a connector with the custom plugin; point it to the desired S3 bucket. Any data passing through the IAM authenticated cluster should now be written to the bucket.
+Description
+This project is the Pinterest Data Pipeline for AiCore, aiming to replicate Pinterest's data analytics infrastructure using AWS Cloud tools.
+
+## Installation Instructions
+
+To set up the Pinterest Data Pipeline, follow these steps:
+
+1. Set up a Kafka Client Machine:
+1. Connect to an EC2 instance.
+1. Install Kafka on the EC2 instance.
+1. Configure IAM authentication on the EC2 instance to enable MSK (Managed Streaming for Kafka) to authenticate it. Here's how:
+    - Install the IAM MSK authentication package.
+    - Set the CLASSPATH environment variable to include the location of the package's .jar file
+    - Modify the client.properties file on the EC2 instance to configure it for AWS IAM authentication to the MSK cluster.
+1. Create Kafka Topics: On the client machine (EC2 instance created in the previous step), create the following Kafka topics:
+    - <user_id>.pin: Contains data about Pinterest posts.
+    - <user_id>.geo: Contains data about the geolocation of each post.
+    -   <user_id>.user: Contains data about the users who uploaded each post.
+1. Connect the MSK Cluster to an S3 Bucket:
+    - Create a custom plugin via the MSK Connect console using the Confluent.io Amazon S3 connector.
+    - Set up a connector with the custom plugin and configure it to point to the desired S3 bucket.
+    -   With this configuration, any data passing through the IAM-authenticated cluster will be automatically written to the specified S3 bucket.
 
 ## Usage instructions
 TBC
