@@ -29,7 +29,7 @@ class AWSDBConnector:
 
 #%% 
 
-invoke_url = 'https://broydqcmtd.execute-api.us-east-1.amazonaws.com/test/topics/user'
+invoke_url = 'https://broydqcmtd.execute-api.us-east-1.amazonaws.com/test/topics/0ec858bf1407.user'
 headers = {
             'Content-Type': 'application/vnd.kafka.json.v2+json',
             'Accept': 'application/vnd.kafka.v2+json'
@@ -65,3 +65,5 @@ print(f'\nStatus code = {r.status_code}')
     
 
 
+
+# %%
