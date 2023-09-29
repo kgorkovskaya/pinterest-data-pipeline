@@ -19,18 +19,18 @@ To set up the Pinterest Data Pipeline, follow these steps:
 1. Set up a Kafka client machine:
 
     - Connect to an EC2 instance and install Kafka by running the following commands (be sure to install the same version of Kafka as the one the Pinterest MSK cluster is running on):
-        <br>`sudo yum install java-1.8.0`
-        <br>`wget https://archive.apache.org/dist/kafka/2.8.1/kafka_2.12-2.8.1.tgz`
-        <br>`tar -xzf kafka_2.12-2.8.1.tgz`
+    <br>`sudo yum install java-1.8.0`
+    <br>`wget https://archive.apache.org/dist/kafka/2.8.1/kafka_2.12-2.8.1.tgz`
+    <br>`tar -xzf kafka_2.12-2.8.1.tgz`
 
     - Configure IAM authentication on the EC2 instance. This will enable MSK (Managed Streaming for Kafka) to authenticate the client machine. Here's how:
 
         - Install the IAM MSK authentication package by running the following commands:
-            - `cd kafka_2.12-2.8.1/libs`
-            - `wget https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.5/aws-msk-iam-auth-1.1.5-all.jar`
+        <br>`cd kafka_2.12-2.8.1/libs`
+        <br>`wget https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.5/aws-msk-iam-auth-1.1.5-all.jar`
 
         - Set the CLASSPATH environment variable to include the location of the package's .jar file, to ensure the IAM libraries will be accessible to the Kafka client:
-            - `export CLASSPATH=/home/ec2-user/kafka_2.12-2.8.1/libs/aws-msk-iam-auth-1.1.5-all.jar`
+        <br>`export CLASSPATH=/home/ec2-user/kafka_2.12-2.8.1/libs/aws-msk-iam-auth-1.1.5-all.jar`
 
         - Navigate to the IAM console, select the EC2 access role associated with your IAM user, and copy its ARN. Go to the Trust relationships tab for the EC2 access role; select "Edit trust policy"; click "Add a principal"; select "IAM roles" as the Principal type.  Replace the ARN with the ARN you copied earlier.
 
@@ -52,16 +52,16 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - __<user_id>.geo__: Contains data about the geolocation of each post.
     - __<user_id>.user__: Contains data about the users who uploaded each post.
 <br><br>To create the above topics, navigate to your __kafka_2.12-2.8.1/bin__ directory and run the following command, replacing the placeholders with the Bootstrap Server String of the Kafka client (EC2 instance), and the topic name:
-        - `./kafka-topics.sh --bootstrap-server <bootstrap_server_string> --command-config client.properties --create --topic <topic_name>`
+<br>`./kafka-topics.sh --bootstrap-server <bootstrap_server_string> --command-config client.properties --create --topic <topic_name>`
     
 
 1. Connect the Pinterest MSK Cluster to an S3 Bucket:
 
     - Download the Confluent.io connector to the EC2 client machine created in the previous step, then copy the file to the relevant S3 bucket. To do this, run the following commands (replace the <bucket_name> placeholder with the name of the S3 bucket associated with your IAM user ID):
-        - `sudo -u ec2-user -i`
-        - `mkdir kafka-connect-s3 && cd kafka-connect-s3`
-        - `wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.0.3/confluentinc-kafka-connect-s3-10.0.3.zip`
-        - `aws s3 cp ./confluentinc-kafka-connect-s3-10.0.3.zip s3://<bucket_name>/kafka-connect-s3/`
+    <br>`sudo -u ec2-user -i`
+    <br>`mkdir kafka-connect-s3 && cd kafka-connect-s3`
+    <br>`wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.0.3/confluentinc-kafka-connect-s3-10.0.3.zip`
+    <br>`aws s3 cp ./confluentinc-kafka-connect-s3-10.0.3.zip s3://<bucket_name>/kafka-connect-s3/`
 
     - Create a custom plugin via the MSK Connect console. To do this, open the MSK console, navigate to "Customised Plugins", and click "Create Customised Plugin". Select the S3 bucket containing the zip file downloaded in the previous step. In the list of objects in the bucket, select the zip file. 
 
@@ -96,8 +96,8 @@ To set up the Pinterest Data Pipeline, follow these steps:
 1. Set up the Kafka REST Proxy on the EC2 client machine, to enable the API to communicate with the MSK cluster.
 
     - Install the Confluent package for the Kafka REST Proxy by running the following commands:
-        - `sudo wget https://packages.confluent.io/archive/7.2/confluent-7.2.0.tar.gz`
-        - `tar -xvzf confluent-7.2.0.tar.gz`
+    <br>`sudo wget https://packages.confluent.io/archive/7.2/confluent-7.2.0.tar.gz`
+    <br>`tar -xvzf confluent-7.2.0.tar.gz`
 
     - Allow the REST Proxy to perform IAM authentication to the MSK cluster by modifying the __kafka-rest.properties__ file (in __confluent-7.2.0/etc/kafka-rest__). Modify the bootstrap.servers and the zookeeper.connect variables with the Bootstrap server string and Plaintext Apache Zookeeper connection string __for the MSK cluster__. Set awsRoleArn to the ARN of the EC2 access role from the previous steps. Sample text is shown below.
 
@@ -140,8 +140,8 @@ To set up the Pinterest Data Pipeline, follow these steps:
 
     - Execute __user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively.
 
-    - To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. To run a consumer, navigate to __kafka_2.12-2.8.1/bin__, and run the following command:
-        - `./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students`
+    - To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. To run a consumer, navigate to __kafka_2.12-2.8.1/bin__, and execute the following command:
+    <br>`./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students`
 
     - If everything has been set up correctly, you should see messages being consumed.
     - Check if data is getting stored in the S3 bucket, by inspecting the bucket via the AWS management console. 
