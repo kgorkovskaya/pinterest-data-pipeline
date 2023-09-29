@@ -42,11 +42,13 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - Install the Confluent package for the Kafka REST Proxy.
     - Allow the REST Proxy to perform IAM authentication to the MSK cluster by modifying the kafka-rest.properties file. Modify the bootstrap.servers and the zookeeper.connect variables in this file with the Bootstrap server string and Plaintext Apache Zookeeper connection string for the MSK cluster. 
 1. Send data to the API.
-    - To start the REST proxy on the EC2 client machine, navigate to the confluent-7.2.0/bin folder and run:
-    ./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties
+    - To start the REST proxy on the EC2 client machine, navigate to the confluent-7.2.0/bin folder and run the following command:
+    __./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties__
     - Execute user_posting_emulation.py locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends a POST request to the API Invoke URL for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively.
-    - To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. If everything has been set up correctly, you should see messages being consumed.
-    - Check if data is getting stored in the S3 bucket. Notice the folder organization (e.g topics/<your_UserId>.pin/partition=0/) that your connector creates in the bucket. 
+    - To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. To run a consumer, navigate to <your_kafka_directory>/bin, and run the following command:
+    __./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students__
+    - If everything has been set up correctly, you should see messages being consumed.
+    - Check if data is getting stored in the S3 bucket. 
 
 
 
