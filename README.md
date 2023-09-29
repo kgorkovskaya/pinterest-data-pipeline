@@ -19,9 +19,9 @@ To set up the Pinterest Data Pipeline, follow these steps:
 1. Set up a Kafka client machine:
 
     - Connect to an EC2 instance and install Kafka by running the following commands (be sure to install the same version of Kafka as the one the Pinterest MSK cluster is running on):
-        - `sudo yum install java-1.8.0`
-        - `wget https://archive.apache.org/dist/kafka/2.8.1/kafka_2.12-2.8.1.tgz`
-        - `tar -xzf kafka_2.12-2.8.1.tgz`
+        <br>`sudo yum install java-1.8.0`
+        <br>`wget https://archive.apache.org/dist/kafka/2.8.1/kafka_2.12-2.8.1.tgz`
+        <br>`tar -xzf kafka_2.12-2.8.1.tgz`
 
     - Configure IAM authentication on the EC2 instance. This will enable MSK (Managed Streaming for Kafka) to authenticate the client machine. Here's how:
 
@@ -136,7 +136,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
 1. Send data to the API.
 
     - To start the REST proxy on the EC2 client machine, navigate to the __confluent-7.2.0/bin__ folder and run the following command:
-        - `__./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties`
+        - `./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties`
 
     - Execute __user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively.
 
