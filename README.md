@@ -84,7 +84,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
 
     - Any data passing through the IAM-authenticated cluster should now be automatically written to the specified S3 bucket.
 
-1. Create a REST API and integrate the API with the MSK cluster. This will enable the API to send data to the cluster. 
+1. Create a REST API and integrate the API with the EC2 client machine. This will enable the API to send data to the cluster. 
 
     - Create a REST API on AWS API Gateway. Add a new resource to the REST API and configure it as a proxy resource by using the following configuration:
         - __Resource name = proxy__
