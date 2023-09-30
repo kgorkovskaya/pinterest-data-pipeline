@@ -29,7 +29,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
         <br>`cd kafka_2.12-2.8.1/libs`
         <br>`wget https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.5/aws-msk-iam-auth-1.1.5-all.jar`
 
-        - Set the CLASSPATH environment variable to include the location of the package's .jar file, to ensure the IAM libraries will be accessible to the Kafka client:
+        - Set the CLASSPATH environment variable to include the location of the package's .jar file, to ensure the IAM authentication libraries will be accessible to the Kafka client:
         <br>`export CLASSPATH=/home/ec2-user/kafka_2.12-2.8.1/libs/aws-msk-iam-auth-1.1.5-all.jar`
 
         - Navigate to the IAM console, select the EC2 access role associated with your IAM user, and copy its ARN. Go to the Trust relationships tab for the EC2 access role; select "Edit trust policy"; click "Add a principal"; select "IAM roles" as the Principal type.  Replace the ARN with the ARN you copied earlier.
@@ -82,9 +82,9 @@ To set up the Pinterest Data Pipeline, follow these steps:
         > <br>`key.converter=org.apache.kafka.connect.storage.StringConverter`
         > <br>`s3.bucket.name=<bucket_name>`
 
-    - Any data passing through the IAM-authenticated cluster should now be automatically written to the specified S3 bucket.
+    - Any data passing through the IAM-authenticated cluster, where the topic matches the __topics.regex__ pattern, should now be automatically written to the specified S3 bucket.
 
-1. Create a REST API and integrate the API with the EC2 client machine. This will enable the API to send data to the cluster. 
+1. Create a REST API and integrate the API with the Kafka client (EC2 instance), then set up the Kafka REST Proxy on the Kafka client. This will enable the API to send data to the cluster. 
 
     - Create a REST API on AWS API Gateway. Add a new resource to the REST API and configure it as a proxy resource by using the following configuration:
         - __Resource name = proxy__
@@ -92,13 +92,9 @@ To set up the Pinterest Data Pipeline, follow these steps:
         - __Select "Enable API Gateway CORS"__
     - Create a HTTP ANY method for the resource. Set the Endpoint URL to the PublicDNS of the EC2 client machine.
     - Deploy the API and make a note of the Invoke URL. 
-
-1. Set up the Kafka REST Proxy on the EC2 client machine, to enable the API to communicate with the MSK cluster.
-
     - Install the Confluent package for the Kafka REST Proxy by running the following commands:
     <br>`sudo wget https://packages.confluent.io/archive/7.2/confluent-7.2.0.tar.gz`
     <br>`tar -xvzf confluent-7.2.0.tar.gz`
-
     - Allow the REST Proxy to perform IAM authentication to the MSK cluster by modifying the __kafka-rest.properties__ file (in __confluent-7.2.0/etc/kafka-rest__). Modify the bootstrap.servers and the zookeeper.connect variables with the Bootstrap server string and Plaintext Apache Zookeeper connection string __for the MSK cluster__. Set awsRoleArn to the ARN of the EC2 access role from the previous steps. Sample text is shown below.
 
         > `# Copyright 2018 Confluent Inc.`
@@ -138,14 +134,24 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - To start the REST proxy on the EC2 client machine, navigate to the __confluent-7.2.0/bin__ folder and run the following command:
         - `./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties`
 
-    - Execute __user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively.
+    - Execute __user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively. This is repeated continuously until the program is terminated.
 
     - To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. To run a consumer, navigate to __kafka_2.12-2.8.1/bin__, and execute the following command:
     <br>`./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students`
 
     - If everything has been set up correctly, you should see messages being consumed.
-    - Check if data is getting stored in the S3 bucket, by inspecting the bucket via the AWS management console. 
+    - Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
 
+1. Read data from S3 into Databricks.
+
+    - Log into Databricks and mount the S3 bucket associated with your IAM user to Databricks. This will enable Databricks to read data from the S3 bucket. The student Databricks account has full access to S3, so in this instance there is no need to create a new Access Key and Secret Access Key for Databricks.
+
+    - To mount the S3 bucket, follow these steps:
+        - Paste the code from __databricks_mount_s3_bucket.py__ into a Databricks notebook and execute; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
+        - Check if the bucket was mounted successfully. If inside the mounted S3 bucket your data is organised in folders, you can specify the whole path in the above command after /mnt/mount_name. With the correct path specified, you should be able to see the contents of the S3 bucket when running the above Python code in a Databricks notebook (replace the mount_name placeholder with the mount name you assigned to the S3 bucket in the previous step).
+        `display(dbutils.fs.ls("/mnt/<mount_name>/../.."))`
+
+    - Paste the code from __databricks_run_analysis.py__ into a Databricks notebook and execute to load data from the mounted bucket into Pandas DataFrames, clean and analyse the data.
 
 
 
