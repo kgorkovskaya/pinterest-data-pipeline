@@ -128,7 +128,6 @@ To set up the Pinterest Data Pipeline, follow these steps:
         > <br>`client.sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler`
 
 ## Usage instructions
-TBC
 
 1. Send data to the API.
 
