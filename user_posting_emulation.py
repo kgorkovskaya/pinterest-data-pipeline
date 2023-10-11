@@ -1,6 +1,7 @@
 '''
 User posting emulation script for Pinterest Data Pipeline project (AiCore).
-Select pinterest data ()
+Runs an infinite loop to select one record of Pinterest data at a time
+from RDS, and post to Kafka topics.
 
 Author: Kristina Gorkovskaya
 Date: 2023-10-11
