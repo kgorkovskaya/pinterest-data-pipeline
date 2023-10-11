@@ -7,7 +7,6 @@
 1. [Usage instructions](#usage-instructions)
 1. [File structure](#file-structure)
 1. [License information](#license-information)
-
 ## Description
 
 This project is the Pinterest Data Pipeline for AiCore, aiming to replicate Pinterest's data analytics infrastructure using AWS Cloud tools.
@@ -128,6 +127,8 @@ To set up the Pinterest Data Pipeline, follow these steps:
         > <br>`# The SASL client bound by "sasl.jaas.config" invokes this class.`
         > <br>`client.sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler`
 
+## Usage instructions
+TBC
 
 1. Send data to the API.
 
@@ -149,14 +150,10 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - To mount the S3 bucket, follow these steps:
         - Paste the code from __databricks_mount_s3_bucket.py__ into a Databricks notebook and execute; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
         - Check if the bucket was mounted successfully. If inside the mounted S3 bucket your data is organised in folders, you can specify the whole path in the above command after /mnt/mount_name. With the correct path specified, you should be able to see the contents of the S3 bucket when running the above Python code in a Databricks notebook (replace the mount_name placeholder with the mount name you assigned to the S3 bucket in the previous step).
-        `display(dbutils.fs.ls("/mnt/<mount_name>/../.."))`
+        <br>`display(dbutils.fs.ls("/mnt/<mount_name>/../.."))`
 
     - Paste the code from __databricks_run_analysis.py__ into a Databricks notebook and execute to load data from the mounted bucket into Pandas DataFrames, clean and analyse the data.
 
-
-
-## Usage instructions
-TBC
 
 ## File structure
 TBC
