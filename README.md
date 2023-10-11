@@ -127,6 +127,16 @@ To set up the Pinterest Data Pipeline, follow these steps:
         > <br>`# The SASL client bound by "sasl.jaas.config" invokes this class.`
         > <br>`client.sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler`
 
+
+1. Mount S3 bucket to Databricks.
+
+    - Log into Databricks and mount the S3 bucket associated with your IAM user to Databricks. This will enable Databricks to read data from the S3 bucket. The student Databricks account has full access to S3, so in this instance there is no need to create a new Access Key and Secret Access Key for Databricks.
+
+    - To mount the S3 bucket, follow these steps:
+        - Paste the code from __databricks_mount_s3_bucket.py__ into a Databricks notebook and execute; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
+        - Check if the bucket was mounted successfully. If inside the mounted S3 bucket your data is organised in folders, you can specify the whole path in the above command after /mnt/mount_name. With the correct path specified, you should be able to see the contents of the S3 bucket when running the above Python code in a Databricks notebook (replace the mount_name placeholder with the mount name you assigned to the S3 bucket in the previous step).
+        <br>`display(dbutils.fs.ls("/mnt/<mount_name>/../.."))`
+
 ## Usage instructions
 
 1. Send data to the API.
@@ -142,14 +152,8 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - If everything has been set up correctly, you should see messages being consumed.
     - Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
 
-1. Read data from S3 into Databricks.
 
-    - Log into Databricks and mount the S3 bucket associated with your IAM user to Databricks. This will enable Databricks to read data from the S3 bucket. The student Databricks account has full access to S3, so in this instance there is no need to create a new Access Key and Secret Access Key for Databricks.
-
-    - To mount the S3 bucket, follow these steps:
-        - Paste the code from __databricks_mount_s3_bucket.py__ into a Databricks notebook and execute; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
-        - Check if the bucket was mounted successfully. If inside the mounted S3 bucket your data is organised in folders, you can specify the whole path in the above command after /mnt/mount_name. With the correct path specified, you should be able to see the contents of the S3 bucket when running the above Python code in a Databricks notebook (replace the mount_name placeholder with the mount name you assigned to the S3 bucket in the previous step).
-        <br>`display(dbutils.fs.ls("/mnt/<mount_name>/../.."))`
+1. Read and analyse data from S3 in Databricks.
 
     - Paste the code from __databricks_run_analysis.py__ into a Databricks notebook and execute to load data from the mounted bucket into Pandas DataFrames, clean and analyse the data.
 
