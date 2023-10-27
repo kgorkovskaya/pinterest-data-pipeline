@@ -133,7 +133,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - Log into Databricks and mount the S3 bucket associated with your IAM user to Databricks. This will enable Databricks to read data from the S3 bucket. The student Databricks account has full access to S3, so in this instance there is no need to create a new Access Key and Secret Access Key for Databricks.
 
     - To mount the S3 bucket, follow these steps:
-        - Paste the code from __databricks_mount_s3_bucket.py__ into a Databricks notebook and execute; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
+        - Run the notebook __mount_s3_bucket.ipynb__ in Databricksa; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
         - Check if the bucket was mounted successfully. If inside the mounted S3 bucket your data is organised in folders, you can specify the whole path in the above command after /mnt/mount_name. With the correct path specified, you should be able to see the contents of the S3 bucket when running the above Python code in a Databricks notebook (replace the mount_name placeholder with the mount name you assigned to the S3 bucket in the previous step).
         <br>`display(dbutils.fs.ls("/mnt/<mount_name>/../.."))`
 
@@ -155,7 +155,15 @@ To set up the Pinterest Data Pipeline, follow these steps:
 
 1. Read and analyse data from S3 in Databricks.
 
-    - Paste the code from __databricks_run_analysis.py__ into a Databricks notebook and execute to load data from the mounted bucket into Pandas DataFrames, clean and analyse the data.
+    - Run the Python notebook __read_and_analyse.ipynb__ in Databricks, to load data from the mounted bucket into Pandas DataFrames, clean and analyse the data. The following analysis is performed:
+    
+        - Clean the DataFrame that contains information about Pinterest posts. Perform the following transofrmations:
+            - Replace empty entries and entries with no relevant data in each column with Nones
+            - Perform the necessary transformations on the follower_count to ensure every entry is a number. Make sure the data type of this column is an int.
+            - Ensure that each column containing numeric data has a numeric data type
+            - Clean the data in the save_location column to include only the save location path
+            - Rename the index column to ind.
+            - Reorder the DataFrame columns to have the following column order: ind, unique_id, title, description, follower_count, poster_name, tag_list, is_image_or_video, image_src, save_location, category
 
 
 ## File structure
