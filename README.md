@@ -157,13 +157,20 @@ To set up the Pinterest Data Pipeline, follow these steps:
 
     - Run the Python notebook __read_and_analyse.ipynb__ in Databricks, to load data from the mounted bucket into Pandas DataFrames, clean and analyse the data. The following analysis is performed:
     
-        - Clean the DataFrame that contains information about Pinterest posts. Perform the following transofrmations:
+        - Clean the DataFrame that contains information about Pinterest posts. Perform the following transformations:
             - Replace empty entries and entries with no relevant data in each column with Nones
             - Perform the necessary transformations on the follower_count to ensure every entry is a number. Make sure the data type of this column is an int.
             - Ensure that each column containing numeric data has a numeric data type
             - Clean the data in the save_location column to include only the save location path
             - Rename the index column to ind.
             - Reorder the DataFrame columns to have the following column order: ind, unique_id, title, description, follower_count, poster_name, tag_list, is_image_or_video, image_src, save_location, category
+        
+        - Clean the DataFrame that contains information about geolocation. Perform the following transformations:
+            - Create a new column coordinates that contains an array based on the latitude and longitude columns.
+            - Drop the latitude and longitude columns from the DataFrame.
+            - Convert the timestamp column from a string to a timestamp data type.
+            - Reorder the DataFrame columns to have the following column order: ind, country, coordinates, timestamp
+
 
 
 ## File structure
