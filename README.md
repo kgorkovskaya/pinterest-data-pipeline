@@ -177,6 +177,11 @@ To set up the Pinterest Data Pipeline, follow these steps:
             - Convert the date_joined column from a string to a timestamp data type
             - Reorder the DataFrame columns to have the following column order: ind, user_name, age, date_joined
 
+        - Analyse the data:
+            - Find the post popular category in each country.
+            - Find the most popular category for each year, between 2018 and 2022.
+            - Find the user with the most followers in each country, and the country with the user with the most followers.
+
 
 
 
