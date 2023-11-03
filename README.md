@@ -171,6 +171,13 @@ To set up the Pinterest Data Pipeline, follow these steps:
             - Convert the timestamp column from a string to a timestamp data type.
             - Reorder the DataFrame columns to have the following column order: ind, country, coordinates, timestamp
 
+        - Clean the DataFrame that contains information about users. Perform the following transformations:
+            - Create a new column user_name that concatenates the information found in the first_name and last_name columns
+            - Drop the first_name and last_name columns from the DataFrame
+            - Convert the date_joined column from a string to a timestamp data type
+            - Reorder the DataFrame columns to have the following column order: ind, user_name, age, date_joined
+
+
 
 
 ## File structure
