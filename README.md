@@ -202,12 +202,18 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
 
 
-
-
-
-
-
 ## File structure
-TBC
+
+├── databricks<br>
+│   ├── analyse_pinterest_data.ipynb<br>
+│   └── mount_s3_bucket.ipynb<br>
+├── kafka<br>
+│   ├── credentials_msk.yml<br>
+│   ├── credentials_rds.yml<br>
+│   └── user_posting_emulation.py<br>
+├── mwaa<br>
+│   └── 0ec858bf1407_dag.py<br>
+└── README.md
+
 
 ## License information
