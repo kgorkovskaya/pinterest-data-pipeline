@@ -7,6 +7,7 @@
 1. [Usage instructions](#usage-instructions)
 1. [File structure](#file-structure)
 1. [License information](#license-information)
+
 ## Description
 
 This project is the Pinterest Data Pipeline for AiCore, aiming to replicate Pinterest's data analytics infrastructure using AWS Cloud tools.
@@ -46,7 +47,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
             ><br>`sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler`
 
 
-1. Create the following Kafka Topics on the client machine:
+1. Create the following Kafka Topics on the client machine created in the previous step:
     - __<user_id>.pin__: Contains data about Pinterest posts.
     - __<user_id>.geo__: Contains data about the geolocation of each post.
     - __<user_id>.user__: Contains data about the users who uploaded each post.
@@ -56,7 +57,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
 
 1. Connect the Pinterest MSK Cluster to an S3 Bucket:
 
-    - Download the Confluent.io connector to the EC2 client machine created in the previous step, then copy the file to the relevant S3 bucket. To do this, run the following commands (replace the <bucket_name> placeholder with the name of the S3 bucket associated with your IAM user ID):
+    - Download the Confluent.io connector to the client machine created in the first step, then copy the file to the relevant S3 bucket. To do this, run the following commands (replace the <bucket_name> placeholder with the name of the S3 bucket associated with your IAM user ID):
     <br>`sudo -u ec2-user -i`
     <br>`mkdir kafka-connect-s3 && cd kafka-connect-s3`
     <br>`wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.0.3/confluentinc-kafka-connect-s3-10.0.3.zip`
@@ -133,18 +134,66 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - Log into Databricks and mount the S3 bucket associated with your IAM user to Databricks. This will enable Databricks to read data from the S3 bucket. The student Databricks account has full access to S3, so in this instance there is no need to create a new Access Key and Secret Access Key for Databricks.
 
     - To mount the S3 bucket, follow these steps:
-        - Run the notebook __mount_s3_bucket.ipynb__ in Databricksa; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
-        - Check if the bucket was mounted successfully. If inside the mounted S3 bucket your data is organised in folders, you can specify the whole path in the above command after /mnt/mount_name. With the correct path specified, you should be able to see the contents of the S3 bucket when running the above Python code in a Databricks notebook (replace the mount_name placeholder with the mount name you assigned to the S3 bucket in the previous step).
+        - Run the notebook __databricks/mount_s3_bucket.ipynb__ in Databricks; replacing AWS_S3_BUCKET with the bucket name relevant to your user ID, and MOUNT_NAME with a value of your choice. This will return True if the bucket was mounted successfully. You only need to mount the bucket once, and then you should be able to access it from Databricks at any time. 
+        - Check if the bucket was mounted successfully. If inside the mounted S3 bucket your data is organised in folders, you can specify the whole path in the above command after /mnt/mount_name. With the correct path specified, you should be able to see the contents of the S3 bucket when running the below Python code in a Databricks notebook (replace the mount_name placeholder with the mount name assigned to the S3 bucket).
         <br>`display(dbutils.fs.ls("/mnt/<mount_name>/../.."))`
+
+    - If the above steps were executed correctly, data sent to the API (see  [Usage instructions](#usage-instructions)) will be stored in the S3 bucket.
+
+1. Read and analyse data from S3 in PySpark.
+
+    Run the notebook __databricks/analyse_pinterest_data.ipynb__ on Databricks, to load data from the mounted S3 bucket into PySpark DataFrames, clean and analyse the data. The following analysis is performed:
+    
+    - Clean the DataFrame that contains information about Pinterest posts. Perform the following transformations:
+        - Replace empty entries and entries with no relevant data in each column with Nones
+        - Perform the necessary transformations on the follower_count to ensure every entry is a number. Make sure the data type of this column is an int.
+        - Ensure that each column containing numeric data has a numeric data type
+        - Clean the data in the save_location column to include only the save location path
+        - Rename the index column to ind.
+        - Reorder the DataFrame columns to have the following column order: ind, unique_id, title, description, follower_count, poster_name, tag_list, is_image_or_video, image_src, save_location, category
+        
+    - Clean the DataFrame that contains information about geolocation. Perform the following transformations:
+        - Create a new column coordinates that contains an array based on the latitude and longitude columns.
+        - Drop the latitude and longitude columns from the DataFrame.
+        - Convert the timestamp column from a string to a timestamp data type.
+        - Reorder the DataFrame columns to have the following column order: ind, country, coordinates, timestamp
+
+    - Clean the DataFrame that contains information about users. Perform the following transformations:
+        - Create a new column user_name that concatenates the information found in the first_name and last_name columns
+        - Drop the first_name and last_name columns from the DataFrame
+        - Convert the date_joined column from a string to a timestamp data type
+        - Reorder the DataFrame columns to have the following column order: ind, user_name, age, date_joined
+
+    - Analyse the data. Find the following:
+        - The most popular category in each country.
+        - The most popular category for each year, between 2018 and 2022.
+        - The user with the most followers in each country, and the country with the user with the most followers.
+        - The median follower count by age group.
+        - The number of users who joined each year between 2015 and 2020.
+        - The median follower count of all users, grouped by joining year.
+        - The median follower count of all users, grouped by joining year and age group.
+
+1. Use Airflow to automatically run the Databricks notebook __databricks/analyse_pinterest_data.ipynb__ on a daily basis.
+
+    - Define a DAG (Directed Acyclic Graph) to run the notebook daily, and upload the Python file containing the DAG to MWAA (Managed Workflows for Apache Airflow) in AWS. The DAG used for this project can be found here: __mwaa/0ec858bf1407_dag.py__ 
+
+    - NB: The student account has been provided with access to an MWAA environment (__Databricks-Airflow-Env__) and to the S3 bucket associated with the environment (__mwaa-dags-bucket__). Therefore, in this instance,there is no need to create an API token in Databricks to connect to the AWS account, set up the MWAA-Databricks connection, or create the requirements.txt file. Simply create a DAG file named <user_id>_dag.py and upload it to the bucket. Note that the DAG inside the file must be named <user_id>_dag.
+
+    - A note on parameters:
+        - __existing_cluster_id__ can be found by selecting the Pinterest cluster in Databricks, opening the Configuration tab, and switching the UI to JSON.
+        - __notebook_path__ can be found by executing the following code in the relevant notebook on Databricks:
+        dbutils.notebook.entry_point.getDbutils().notebook().<br>`getContext().notebookPath().get()`
+
+    - Then manually trigger the DAG. Navigate to MWAA via AWS management console, select the correct environment, navigate to its UI, unpause the DAG, open it, and press the Play button. View the logs to see if the job was successfully executed.
 
 ## Usage instructions
 
-1. Send data to the API.
+1. Send data to the Kafka REST API.
 
     - To start the REST proxy on the EC2 client machine, navigate to the __confluent-7.2.0/bin__ folder and run the following command:
     <br>`./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties`
 
-    - Execute __user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively. This is repeated continuously until the program is terminated.
+    - Execute __kafka/user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively. This is repeated continuously until the program is terminated.
 
     - To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. To run a consumer, navigate to __kafka_2.12-2.8.1/bin__, and execute the following command:
     <br>`./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students`
@@ -153,38 +202,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
 
 
-1. Read and analyse data from S3 in Databricks.
 
-    - Run the Python notebook __read_and_analyse.ipynb__ in Databricks, to load data from the mounted bucket into Pandas DataFrames, clean and analyse the data. The following analysis is performed:
-    
-        - Clean the DataFrame that contains information about Pinterest posts. Perform the following transformations:
-            - Replace empty entries and entries with no relevant data in each column with Nones
-            - Perform the necessary transformations on the follower_count to ensure every entry is a number. Make sure the data type of this column is an int.
-            - Ensure that each column containing numeric data has a numeric data type
-            - Clean the data in the save_location column to include only the save location path
-            - Rename the index column to ind.
-            - Reorder the DataFrame columns to have the following column order: ind, unique_id, title, description, follower_count, poster_name, tag_list, is_image_or_video, image_src, save_location, category
-        
-        - Clean the DataFrame that contains information about geolocation. Perform the following transformations:
-            - Create a new column coordinates that contains an array based on the latitude and longitude columns.
-            - Drop the latitude and longitude columns from the DataFrame.
-            - Convert the timestamp column from a string to a timestamp data type.
-            - Reorder the DataFrame columns to have the following column order: ind, country, coordinates, timestamp
-
-        - Clean the DataFrame that contains information about users. Perform the following transformations:
-            - Create a new column user_name that concatenates the information found in the first_name and last_name columns
-            - Drop the first_name and last_name columns from the DataFrame
-            - Convert the date_joined column from a string to a timestamp data type
-            - Reorder the DataFrame columns to have the following column order: ind, user_name, age, date_joined
-
-        - Analyse the data. Find the following:
-            - The post popular category in each country.
-            - The most popular category for each year, between 2018 and 2022.
-            - The user with the most followers in each country, and the country with the user with the most followers.
-            - The median follower count by age group.
-            - The number of users who joined each year between 2015 and 2020.
-            - The median follower count of all users, grouped by joining year.
-            - The median follower count of all users, grouped by joining year and age group.
 
 
 
