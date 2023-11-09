@@ -204,16 +204,17 @@ To set up the Pinterest Data Pipeline, follow these steps:
 
 ## File structure
 
-├── databricks<br>
-│   ├── analyse_pinterest_data.ipynb<br>
-│   └── mount_s3_bucket.ipynb<br>
-├── kafka<br>
-│   ├── credentials_msk.yml<br>
-│   ├── credentials_rds.yml<br>
-│   └── user_posting_emulation.py<br>
-├── mwaa<br>
-│   └── 0ec858bf1407_dag.py<br>
+```bash
+├── databricks
+│   ├── analyse_pinterest_data.ipynb
+│   └── mount_s3_bucket.ipynb
+├── kafka
+│   ├── credentials_msk.yml
+│   ├── credentials_rds.yml
+│   └── user_posting_emulation.py
+├── mwaa
+│   └── 0ec858bf1407_dag.py
 └── README.md
-
+```
 
 ## License information
