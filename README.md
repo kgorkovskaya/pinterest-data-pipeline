@@ -182,7 +182,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - A note on parameters:
         - __existing_cluster_id__ can be found by selecting the Pinterest cluster in Databricks, opening the Configuration tab, and switching the UI to JSON.
         - __notebook_path__ can be found by executing the following code in the relevant notebook on Databricks:
-        dbutils.notebook.entry_point.getDbutils().notebook().<br>`getContext().notebookPath().get()`
+        <br>`dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()`
 
     - Then manually trigger the DAG. Navigate to MWAA via AWS management console, select the correct environment, navigate to its UI, unpause the DAG, open it, and press the Play button. View the logs to see if the job was successfully executed.
 
