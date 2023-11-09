@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 # Params for Submit Run Operator
 notebook_task = {
-    'notebook_path': '/Users/kristina.gorkovskaya@gmail.com/read_and_analyse',
+    'notebook_path': '/Users/kristina.gorkovskaya@gmail.com/analyse_pinterest_data',
 }
 
 
