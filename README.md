@@ -184,14 +184,14 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
 
 1. To start the REST proxy on the EC2 client machine, navigate to the __confluent-7.2.0/bin__ folder and run the following command:
     ```
-    kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties
+    $ kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties
     ```
 
 1. Execute __kafka/user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively. This is repeated continuously until the program is terminated.
 
 1. To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. To run a consumer, navigate to __kafka_2.12-2.8.1/bin__, and execute the following command:
     ```
-    ./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students
+    $ ./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students
     ```
 
 1. If everything has been set up correctly, you should see messages being consumed. Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
