@@ -194,8 +194,7 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
     ./kafka-console-consumer.sh --bootstrap-server <bootstrap server string> --consumer.config client.properties --topic <topic_name> --from-beginning --group students
     ```
 
-1. If everything has been set up correctly, you should see messages being consumed.
-    - Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
+1. If everything has been set up correctly, you should see messages being consumed. Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
 
 ### Read and analyse data from S3 in PySpark on Databricks
 
