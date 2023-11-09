@@ -7,7 +7,6 @@
 
 1. [Installation instructions](#installation-instructions)
 
-1. [Usage instructions](#usage-instructions)
     
     - [Set up Kafka client machine](#set-up-kafka-client)
 
@@ -22,6 +21,8 @@
     - [Schedule analysis with Airflow](#schedule-analysis-with-airflow)
 
     - [Send Pinterest data to Kinesis Data Streams](#send-pinterest-data-to-kinesis-data-streams)
+
+1. [Usage instructions](#usage-instructions)
 
 1. [File structure](#file-structure)
 
@@ -352,7 +353,7 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
 
 
 ## Usage instructions
-
+TBC
 
 ## File structure
 
