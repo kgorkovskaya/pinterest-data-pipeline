@@ -194,16 +194,86 @@ To set up the Pinterest Data Pipeline, follow these steps:
         - __streaming-<user_id>-geo__
         - __streaming-<user_id>-user__
 
-    - Configure your previously created REST API to allow it to invoke Kinesis actions. 
-        - The student AWS account has the necessary permissions to invoke Kinesis actions, so there is need to create an IAM role for your API to access Kinesis.
-        - The access role you have been provided with has the following structure: __<user_id>-kinesis-access-role__. Copy the ARN of this role from the IAM console, under Roles, and use it when setting up the Execution role for the integration point of all the methods you will create.
+    - The student AWS account has been provided with an IAM access role (__<user_id>-kinesis-access-role__) with the necessary permissions to invoke Kinesis actions. Copy the ARN of this role from the IAM console, and use it when configuring the REST API in the following steps.
+    
+    - Open API Gateway and configure your previously created REST API to allow it to invoke Kinesis actions.
+    
+        - Create a new resource named __streams__. Leave other settings as default. 
+        
+        - Create a __GET__ method under the __streams__ resource; this will allow you to list available streams. Specify the following options:
+            
+            - Method type: GET
+            - Integration Type: AWS Service
+            - AWS Region: us-east-1
+            - AWS Service: Kinesis
+            - HTTP Method: POST
+            - Action Type: Use action name
+            - Action: ListStreams
+            - Execution role: <ARN from previous step>
+            - Content Handling: Passthrough
+            - Use default timeout: Yes
 
-Your API should be able to invoke the following actions:
+            Hit Save, then edit the Integration Request to and create a new HTTP Header:
+            - Name: Content-Type
+            - Mapped from: 'application/x-amz-json-1.1' _include the single quotes!_
 
-    List streams in Kinesis
-    Create, describe and delete streams in Kinesis
-    Add records to streams in Kinesis
+            Create a Mapping Template in the Integration Request panel, with the following options:
+            - Content type: application/json
+            - Template editor: 
+                ```
+                {}
+                ```
 
+        - Under the __streams__ resource create a new child resource with the Resource Path __{stream-name}__.
+
+        - Create a __GET__ method under the __streams/{stream-name}__ resource. These will allow you to describe Kinesis streams. To create these methods, follow the steps described above, but updating the following parameters:
+
+            - Method Type: GET
+            - Action: DescribeStream
+            - Mapping template (template editor):
+                ``` 
+                {
+                "StreamName": "$input.params('stream-name')"
+                }
+                ```
+
+        - Create a __POST__ method under the __streams/{stream-name}__ resource. These will allow you to create Kinesis streams. To create these methods, follow the steps described above, but updating the following parameters:
+
+            - Method Type: POST
+            - Action: CreateStream
+            - Mapping template (template editor): 
+                ```
+                {
+                "ShardCount": #if($input.path('$.ShardCount') == '') 5 #else $input.path('$.ShardCount') #end,
+                "StreamName": "$input.params('stream-name')"
+                }
+                ```
+
+        - Create a __DELETE__ method under the __streams/{stream-name}__ resource. These will allow you to create Kinesis streams. To create these methods, follow the steps described above, but updating the following parameters:
+
+            - Method Type: DELETE
+            - Action: DeleteStream
+            - Mapping template (template editor): 
+                ```
+                {
+                "StreamName": "$input.params('stream-name')"
+                }
+                ```
+
+        - Finally, under the __streams/{stream-name}__ resource, create 2 new child resources, called __record__ and __records__.
+
+        - Create a __PUT__ method for each of these new resources. This will allow you to add records to streams in Kinesis. Follow the steps described above, but updating the following parameters:
+
+            - Method Type: PUT
+            - Action: PutRecord
+            - Mapping template (template editor): 
+                ```
+                {
+                "StreamName": "$input.params('stream-name')",
+                "Data": "$util.base64Encode($input.json('$.Data'))",
+                "PartitionKey": "$input.path('$.PartitionKey')"
+                }
+                ```
 
 
 ## Usage instructions
