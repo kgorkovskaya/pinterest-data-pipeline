@@ -19,22 +19,22 @@ To set up the Pinterest Data Pipeline, follow these steps:
 1. Set up a Kafka client machine:
 
     - Connect to an EC2 instance and install Kafka by running the following commands (be sure to install the same version of Kafka as the one the Pinterest MSK cluster is running on):
-    <br>`sudo yum install java-1.8.0`
-    <br>`wget https://archive.apache.org/dist/kafka/2.8.1/kafka_2.12-2.8.1.tgz`
-    <br>`tar -xzf kafka_2.12-2.8.1.tgz`
+    <br>`$ sudo yum install java-1.8.0`
+    <br>`$ wget https://archive.apache.org/dist/kafka/2.8.1/kafka_2.12-2.8.1.tgz`
+    <br>`$ tar -xzf kafka_2.12-2.8.1.tgz`
 
-    - Configure IAM authentication on the EC2 instance. This will enable MSK (Managed Streaming for Kafka) to authenticate the client machine. Here's how:
+    - Configure IAM authentication. This will enable MSK (Managed Streaming for Kafka) to authenticate the client machine. Here's how:
 
         - Install the IAM MSK authentication package by running the following commands:
-        <br>`cd kafka_2.12-2.8.1/libs`
-        <br>`wget https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.5/aws-msk-iam-auth-1.1.5-all.jar`
+        <br>`$ cd kafka_2.12-2.8.1/libs`
+        <br>`$ wget https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.5/aws-msk-iam-auth-1.1.5-all.jar`
 
-        - Set the CLASSPATH environment variable to include the location of the package's .jar file, to ensure the IAM authentication libraries will be accessible to the Kafka client:
-        <br>`export CLASSPATH=/home/ec2-user/kafka_2.12-2.8.1/libs/aws-msk-iam-auth-1.1.5-all.jar`
+        - Set the CLASSPATH environment variable to include the location of the package's .jar file. This ensures IAM authentication libraries will be accessible to the Kafka client:
+        <br>`$ export CLASSPATH=/home/ec2-user/kafka_2.12-2.8.1/libs/aws-msk-iam-auth-1.1.5-all.jar`
 
-        - Navigate to the IAM console, select the EC2 access role associated with your IAM user, and copy its ARN. Go to the Trust relationships tab for the EC2 access role; select "Edit trust policy"; click "Add a principal"; select "IAM roles" as the Principal type.  Replace the ARN with the ARN you copied earlier.
+        - Navigate to the AWS IAM console, select the EC2 access role associated with your IAM user, and copy its ARN. Go to the Trust relationships tab for the EC2 access role; select "Edit trust policy"; click "Add a principal"; select "IAM roles" as the Principal type.  Replace the ARN with the ARN you copied earlier.
 
-        - Configure the Kafka client to use AWS IAM authentication to the cluster. To do this, modify the __client.properties__ file inside your __kafka_2.12-2.8.1/bin__ directory. Sample text is shown below; set awsRoleArn to point to the ARN of the EC2 access role from the previous step.
+        - Configure the Kafka client (EC2 instance) to use AWS IAM authentication to the cluster. To do this, modify the client.properties file (__kafka_2.12-2.8.1/bin/client.properties__). Sample text is shown below; set awsRoleArn to point to the ARN of the EC2 access role from the previous step.
 
             >`# Sets up TLS for encryption and SASL for authN.`
             ><br>`security.protocol = SASL_SSL`
@@ -46,22 +46,23 @@ To set up the Pinterest Data Pipeline, follow these steps:
             ><br>`# The SASL client bound by "sasl.jaas.config" invokes this class.`
             ><br>`sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler`
 
+    - Create 3 new Kafka Topics on the client machine. To create a topic, navigate to the __kafka_2.12-2.8.1/bin__ directory and run the following command, replacing the placeholders with the Bootstrap Server String of the EC2 instance, and the topic name:
 
-1. Create the following Kafka Topics on the client machine created in the previous step:
-    - __<user_id>.pin__: Contains data about Pinterest posts.
-    - __<user_id>.geo__: Contains data about the geolocation of each post.
-    - __<user_id>.user__: Contains data about the users who uploaded each post.
-<br><br>To create the above topics, navigate to your __kafka_2.12-2.8.1/bin__ directory and run the following command, replacing the placeholders with the Bootstrap Server String of the Kafka client (EC2 instance), and the topic name:
-<br>`./kafka-topics.sh --bootstrap-server <bootstrap_server_string> --command-config client.properties --create --topic <topic_name>`
-    
+        `$ ./kafka-topics.sh --bootstrap-server <bootstrap_server_string> --command-config client.properties --create --topic <topic_name>`
+
+        Create the following topics:
+        - __<user_id>.pin__: Contains data about Pinterest posts.
+        - __<user_id>.geo__: Contains data about the geolocation of each post.
+        - __<user_id>.user__: Contains data about the users who uploaded each post.
+
 
 1. Connect the Pinterest MSK Cluster to an S3 Bucket:
 
-    - Download the Confluent.io connector to the client machine created in the first step, then copy the file to the relevant S3 bucket. To do this, run the following commands (replace the <bucket_name> placeholder with the name of the S3 bucket associated with your IAM user ID):
-    <br>`sudo -u ec2-user -i`
-    <br>`mkdir kafka-connect-s3 && cd kafka-connect-s3`
-    <br>`wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.0.3/confluentinc-kafka-connect-s3-10.0.3.zip`
-    <br>`aws s3 cp ./confluentinc-kafka-connect-s3-10.0.3.zip s3://<bucket_name>/kafka-connect-s3/`
+    - Download the Confluent.io connector to the EC2 machine created in the previous step, then copy the file to the relevant S3 bucket. To do this, run the following commands (replace the <bucket_name> placeholder with the name of the S3 bucket associated with your IAM user ID):
+    <br>`$ sudo -u ec2-user -i`
+    <br>`$ mkdir kafka-connect-s3 && cd kafka-connect-s3`
+    <br>`$ wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-s3/versions/10.0.3/confluentinc-kafka-connect-s3-10.0.3.zip`
+    <br>`$ aws s3 cp ./confluentinc-kafka-connect-s3-10.0.3.zip s3://<bucket_name>/kafka-connect-s3/`
 
     - Create a custom plugin via the MSK Connect console. To do this, open the MSK console, navigate to "Customised Plugins", and click "Create Customised Plugin". Select the S3 bucket containing the zip file downloaded in the previous step. In the list of objects in the bucket, select the zip file. 
 
@@ -84,7 +85,7 @@ To set up the Pinterest Data Pipeline, follow these steps:
 
     - Any data passing through the IAM-authenticated cluster, where the topic matches the __topics.regex__ pattern, should now be automatically written to the specified S3 bucket.
 
-1. Create a REST API and integrate the API with the Kafka client (EC2 instance), then set up the Kafka REST Proxy on the Kafka client. This will enable the API to send data to the cluster. 
+1. Create a REST API and integrate the API with the Kafka client, then set up the Kafka REST Proxy on the Kafka client. This will enable the API to send data to the Pinterest MSK cluster. 
 
     - Create a REST API on AWS API Gateway. Add a new resource to the REST API and configure it as a proxy resource by using the following configuration:
         - __Resource name = proxy__
@@ -93,8 +94,8 @@ To set up the Pinterest Data Pipeline, follow these steps:
     - Create a HTTP ANY method for the resource. Set the Endpoint URL to the PublicDNS of the EC2 client machine.
     - Deploy the API and make a note of the Invoke URL. 
     - Install the Confluent package for the Kafka REST Proxy by running the following commands:
-    <br>`sudo wget https://packages.confluent.io/archive/7.2/confluent-7.2.0.tar.gz`
-    <br>`tar -xvzf confluent-7.2.0.tar.gz`
+    <br>`$ sudo wget https://packages.confluent.io/archive/7.2/confluent-7.2.0.tar.gz`
+    <br>`$ tar -xvzf confluent-7.2.0.tar.gz`
     - Allow the REST Proxy to perform IAM authentication to the MSK cluster by modifying the __kafka-rest.properties__ file (in __confluent-7.2.0/etc/kafka-rest__). Modify the bootstrap.servers and the zookeeper.connect variables with the Bootstrap server string and Plaintext Apache Zookeeper connection string __for the MSK cluster__. Set awsRoleArn to the ARN of the EC2 access role from the previous steps. Sample text is shown below.
 
         > `# Copyright 2018 Confluent Inc.`
@@ -185,6 +186,25 @@ To set up the Pinterest Data Pipeline, follow these steps:
         <br>`dbutils.notebook.entry_point.getDbutils().notebook().getContext().notebookPath().get()`
 
     - Then manually trigger the DAG. Navigate to MWAA via AWS management console, select the correct environment, navigate to its UI, unpause the DAG, open it, and press the Play button. View the logs to see if the job was successfully executed.
+
+1. Send Pinterest data to Kinesis Data Streams.
+
+    - Create 3 new Kinesis Data Streams via the Kinesis management console in AWS; one for each Pinterest table, using the following naming convention (be sure to select the correct region):
+        - __streaming-<user_id>-pin__
+        - __streaming-<user_id>-geo__
+        - __streaming-<user_id>-user__
+
+    - Configure your previously created REST API to allow it to invoke Kinesis actions. 
+        - The student AWS account has the necessary permissions to invoke Kinesis actions, so there is need to create an IAM role for your API to access Kinesis.
+        - The access role you have been provided with has the following structure: __<user_id>-kinesis-access-role__. Copy the ARN of this role from the IAM console, under Roles, and use it when setting up the Execution role for the integration point of all the methods you will create.
+
+Your API should be able to invoke the following actions:
+
+    List streams in Kinesis
+    Create, describe and delete streams in Kinesis
+    Add records to streams in Kinesis
+
+
 
 ## Usage instructions
 
