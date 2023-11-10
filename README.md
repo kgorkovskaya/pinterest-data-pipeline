@@ -16,13 +16,15 @@
 
     - [Send data to Kafka via REST API](#send-data-to-kafka-via-rest-api)
 
-    - [Read and analyse data from S3 in PySpark on Databricks](#read-and-analyse-data-from-s3-in-pyspark-on-databricks)
+    - [Read and analyse batch data in PySpark on Databricks](#read-and-analyse-batch-data-in-pyspark-on-databricks)
 
     - [Schedule analysis with Airflow](#schedule-analysis-with-airflow)
 
     - [Integrate REST API with Kinesis](#integrate-rest-api-with-kinesis)
 
     - [Send data to Kinesis via REST API](#send-data-to-kinesis-via-rest-api)
+
+    - [Read and analyse streaming data in PySpark on Databricks](#read-and-analyse-streaming-data-in-pyspark-on-databricks)
     
 
 1. [Usage instructions](#usage-instructions)
@@ -208,7 +210,7 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
 1. If everything has been set up correctly, you should see messages being consumed. Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
 
 
-### Read and analyse data from S3 in PySpark on Databricks
+### Read and analyse batch data in PySpark on Databricks
 
 1. Log into Databricks using the credentials provided, and mount the S3 bucket associated with your IAM user to Databricks. This will enable Databricks to read data from the S3 bucket. The student Databricks account has full access to S3, so in this instance there is no need to create a new Access Key and Secret Access Key for Databricks.
 
@@ -224,7 +226,7 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
     - If the above steps were executed correctly, data sent to the API will be stored in the S3 bucket.
 
 
-1. Run the notebook __databricks/analyse_pinterest_data.ipynb__ on Databricks, to load data from the mounted S3 bucket into PySpark DataFrames, clean and analyse the data. The following analysis is performed.
+1. Run the notebook __databricks/analyse_pinterest_data_batch_.ipynb__ on Databricks, to load data from the mounted S3 bucket into PySpark DataFrames, clean and analyse the data. The following analysis is performed.
     
     - Clean the DataFrame that contains information about Pinterest posts. Perform the following transformations:
         - Replace empty entries and entries with no relevant data in each column with Nones
@@ -258,7 +260,7 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
 
 ### Schedule analysis with Airflow
 
-Use Airflow to automatically run the Databricks notebook __databricks/analyse_pinterest_data.ipynb__ on a daily basis.
+Use Airflow to automatically run the Databricks notebook __databricks/analyse_pinterest_data_batch.ipynb__ on a daily basis.
 
 1. Define a DAG (Directed Acyclic Graph) to run the notebook daily, and upload the Python file containing the DAG to MWAA (Managed Workflows for Apache Airflow) in AWS. The DAG used for this project can be found here: __mwaa/0ec858bf1407_dag.py__ 
 
@@ -397,6 +399,15 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
 1. To check that data is being sent to Kinesis, open the Kinesis management console, navigate to each of the above data streams, and open the Data Viewer tab. Set starting position to "At timestamp", specify the approximate time when data was sent, and click "Get records" to display records sent to each shard.
 
 
+### Read and analyse streaming data in PySpark on Databricks
+
+1. Log into Databricks using the credentials provided, and run the notebook __databricks/analyse_pinterest_data_streaming_.ipynb__ on Databricks. This will read from each of the three Kinesis Data Streams, clean the data (applying the transformations described [here](#read-and-analyse-batch-data-in-pyspark-on-databricks)), and write the transformed data to the following delta tables:
+
+    - __<user_id>\_geo_table__
+    - __<user_id>\_pin_table__
+    - __<user_id>\_user_table__
+
+
 ## Usage instructions
 TBC
 
@@ -404,7 +415,8 @@ TBC
 
 ```bash
 ├── databricks
-│   ├── analyse_pinterest_data.ipynb
+│   ├── analyse_pinterest_data_batch.ipynb
+│   ├── analyse_pinterest_data_streaming.ipynb
 │   └── mount_s3_bucket.ipynb
 ├── mwaa
 │   └── 0ec858bf1407_dag.py
