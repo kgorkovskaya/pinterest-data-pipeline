@@ -22,7 +22,7 @@ class AWSDBConnector:
     '''
     This class is used to connect to an RDS database on AWS.
 	Attributes:
-		HOST (str): host URL
+        HOST (str): host URL
         DATABASE (str): name of database
         PORT (int): port on which database in hosted
         USER (str): user name for database connection
@@ -62,7 +62,7 @@ class PostingEmulation(ABC):
     infinite loop to select one random row at a time from specified RDS tables and post each row to a REST API. 
 
 	Attributes:
-		db_connector (AWSDBConnector): connection to Pinterest database
+        db_connector (AWSDBConnector): connection to Pinterest database
         invoke_url (str): partial API endpoint URL
         table_mapping (dict): maps table names to aliases which will be used to construct the API endpoint URL 
         user_id (str): AWS IAM User ID; this will be used to construct the API endpoint URL
