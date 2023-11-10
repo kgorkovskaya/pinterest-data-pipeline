@@ -21,13 +21,13 @@ random.seed(100)
 class AWSDBConnector:
     '''
     This class is used to connect to an RDS database on AWS.
-	Attributes:
+    Attributes:
         HOST (str): host URL
         DATABASE (str): name of database
         PORT (int): port on which database in hosted
         USER (str): user name for database connection
         PASSWORD (str): password for database connection
-	'''
+    '''
 
     def __init__(self):
         '''Read RDS credentials from YAML file.'''
@@ -60,13 +60,12 @@ class PostingEmulation(ABC):
     '''
     This Abstract Base Class connects to an AWS RDS database containing Pinterest data, then runs an 
     infinite loop to select one random row at a time from specified RDS tables and post each row to a REST API. 
-
     Attributes:
         db_connector (AWSDBConnector): connection to Pinterest database
         invoke_url (str): partial API endpoint URL
         table_mapping (dict): maps table names to aliases which will be used to construct the API endpoint URL 
         user_id (str): AWS IAM User ID; this will be used to construct the API endpoint URL
-	'''
+    '''
 
     def __init__(self):
         '''See help(PostingEmulation) for accurate signature.'''
@@ -101,6 +100,7 @@ class PostingEmulation(ABC):
         Run infinite loop to select a random row from each in-scope 
         RDS table, then post that row to the API.
         '''
+        
         engine = self.db_connector.create_db_connector()
         with engine.connect() as connection:
             while True:

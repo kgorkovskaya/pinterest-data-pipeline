@@ -19,7 +19,7 @@ class PostingEmulationKinesis(PostingEmulation):
     This class connects to an AWS RDS database containing Pinterest data, then runs an 
     infinite loop to select one random row at a time from specified RDS tables and post each row to 
     the appropriate Kinesis Data Stream for that table, via a REST API.
-	'''
+    '''
 
     def __init__(self, num_shards: int = 4):
         '''See help(PostingEmulationKinesis) for accurate signature.'''

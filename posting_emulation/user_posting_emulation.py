@@ -18,7 +18,7 @@ class PostingEmulationMSK(PostingEmulation):
     This class connects to an AWS RDS database containing Pinterest data, then runs an 
     infinite loop to select one random row at a time from specified RDS tables and and post each row to 
     the appropriate Kafka topic for that table, via a REST API.
-	'''
+    '''
 
     def __init__(self):
         '''See help(PostingEmulationMSK) for accurate signature.'''
