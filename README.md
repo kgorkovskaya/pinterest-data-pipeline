@@ -14,13 +14,16 @@
 
     - [Create REST API and integrate with Kafka client](#create-rest-api-and-integrate-with-kafka-client)
 
-    - [Send data to the Kafka REST API](#send-data-to-the-kafka-rest-api)
+    - [Send data to Kafka via REST API](#send-data-to-kafka-via-rest-api)
 
     - [Read and analyse data from S3 in PySpark on Databricks](#read-and-analyse-data-from-s3-in-pyspark-on-databricks)
 
     - [Schedule analysis with Airflow](#schedule-analysis-with-airflow)
 
-    - [Send Pinterest data to Kinesis Data Streams](#send-pinterest-data-to-kinesis-data-streams)
+    - [Integrate REST API with Kinesis](#integrate-rest-api-with-kinesis)
+
+    - [Send data to Kinesis via REST API](#send-data-to-kinesis-via-rest-api)
+    
 
 1. [Usage instructions](#usage-instructions)
 
@@ -180,14 +183,22 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
     client.sasl.client.callback.handler.class = software.amazon.msk.auth.iam.IAMClientCallbackHandler
     ```
 
-### Send data to the Kafka REST API
+### Send data to Kafka via REST API
 
 1. To start the REST proxy on the EC2 client machine, navigate to the __confluent-7.2.0/bin__ folder and run the following command:
     ```
-    $ kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties
+    $ ./kafka-rest-start /home/ec2-user/confluent-7.2.0/etc/kafka-rest/kafka-rest.properties
     ```
 
-1. Execute __kafka/user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively. This is repeated continuously until the program is terminated.
+1. Execute __posting_emulation/user_posting_emulation.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the <user_id>.pin, <user_id>.geo, and <user_id>.user Kafka topics, respectively. This is repeated continuously until the program is terminated.
+
+    NB: a YAML file containing the following attributes must be saved in your working directory as __credentials_rds.yml__:
+    - host
+    - database
+    - port
+    - user
+    - password
+
 
 1. To check that data is being sent to the cluster, open one terminal window for each of the above topics and run a Kafka consumer in each window. To run a consumer, navigate to __kafka_2.12-2.8.1/bin__, and execute the following command:
     ```
@@ -195,6 +206,7 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
     ```
 
 1. If everything has been set up correctly, you should see messages being consumed. Check if data is getting stored in the S3 bucket by inspecting the bucket via the AWS management console. 
+
 
 ### Read and analyse data from S3 in PySpark on Databricks
 
@@ -261,7 +273,8 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
 
 1. Manually trigger the DAG to check that it's working. Navigate to MWAA via AWS management console, select the correct environment, navigate to its UI, unpause the DAG, open it, and press the Play button. View the logs to see if the job was successfully executed.
 
-### Send Pinterest data to Kinesis Data Streams.
+
+### Integrate REST API with Kinesis
 
 1. Create 3 new Kinesis Data Streams via the Kinesis management console in AWS; one for each Pinterest table, using the following naming convention (be sure to select the correct region):
     - __streaming-<user_id>-pin__
@@ -337,7 +350,7 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
 
     - Finally, under the __streams/{stream-name}__ resource, create 2 new child resources, called __record__ and __records__.
 
-    - Create a __PUT__ method for each of these new resources. This will allow you to add records to streams in Kinesis. Follow the steps described above, but updating the following parameters:
+    - Create a __PUT__ method under the __streams/{stream-name}/record__ resource. This will allow you to add a single record to streams in Kinesis. Follow the steps described above, but updating the following parameters:
 
         - Method Type: PUT
         - Action: PutRecord
@@ -348,7 +361,40 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
             "Data": "$util.base64Encode($input.json('$.Data'))",
             "PartitionKey": "$input.path('$.PartitionKey')"
             }
+
+    - Create a __PUT__ method under the __streams/{stream-name}/records__ resource. This will allow you to add a single record to streams in Kinesis. Follow the steps described above, but updating the following parameters:
+
+        - Method Type: PUT
+        - Action: PutRecords
+        - Mapping template (template editor): 
             ```
+            {
+                "StreamName": "$input.params('stream-name')",
+                "Records": [
+                #foreach($elem in $input.path('$.records'))
+                    {
+                        "Data": "$util.base64Encode($elem.data)",
+                        "PartitionKey": "$elem.partition-key"
+                    }#if($foreach.hasNext),#end
+                    #end
+                ]
+            }
+            ```
+
+### Send data to Kinesis via REST API
+
+
+1. Execute __posting_emulation/user_posting_emulation_streaming.py__ locally; this connects to an RDS database containing Pinterest data, selects a random row from the pinterest_data, geolocation_data, and user_data tables, and sends POST requests to the API Invoke URLs for the streaming-<user_id>-pin, streaming-<user_id>-geo, and streaming-<user_id>-user Data Streams, respectively. This is repeated continuously until the program is terminated.
+
+    NB: a YAML file containing the following attributes must be saved in your working directory as __credentials_rds.yml__:
+    - host
+    - database
+    - port
+    - user
+    - password
+
+
+1. To check that data is being sent to Kinesis, open the Kinesis management console, navigate to each of the above data streams, and open the Data Viewer tab. Set starting position to "At timestamp", specify the approximate time when data was sent, and click "Get records" to display records sent to each shard.
 
 
 ## Usage instructions
@@ -360,13 +406,15 @@ TBC
 ├── databricks
 │   ├── analyse_pinterest_data.ipynb
 │   └── mount_s3_bucket.ipynb
-├── kafka
-│   ├── credentials_msk.yml
-│   ├── credentials_rds.yml
-│   └── user_posting_emulation.py
 ├── mwaa
 │   └── 0ec858bf1407_dag.py
+├── posting_emulation
+│   ├── credentials_rds.yml
+│   ├── posting_emulation_classes.py
+│   ├── user_posting_emulation.py
+│   └── user_posting_emulation_streaming.py
 └── README.md
+
 ```
 
 ## License information
