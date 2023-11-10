@@ -61,7 +61,7 @@ class PostingEmulation(ABC):
     This Abstract Base Class connects to an AWS RDS database containing Pinterest data, then runs an 
     infinite loop to select one random row at a time from specified RDS tables and post each row to a REST API. 
 
-	Attributes:
+    Attributes:
         db_connector (AWSDBConnector): connection to Pinterest database
         invoke_url (str): partial API endpoint URL
         table_mapping (dict): maps table names to aliases which will be used to construct the API endpoint URL 
