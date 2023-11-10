@@ -18,7 +18,7 @@
 
     - [Read and analyse batch data in PySpark on Databricks](#read-and-analyse-batch-data-in-pyspark-on-databricks)
 
-    - [Schedule analysis with Airflow](#schedule-analysis-with-airflow)
+    - [Schedule batch analysis with Airflow](#schedule-batch-analysis-with-airflow)
 
     - [Integrate REST API with Kinesis](#integrate-rest-api-with-kinesis)
 
@@ -258,7 +258,7 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
         - The median follower count of all users, grouped by joining year and age group.
 
 
-### Schedule analysis with Airflow
+### Schedule batch analysis with Airflow
 
 Use Airflow to automatically run the Databricks notebook __databricks/analyse_pinterest_data_batch.ipynb__ on a daily basis.
 
@@ -407,9 +407,21 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
     - __<user_id>\_pin_table__
     - __<user_id>\_user_table__
 
+    NB: this will refresh the delta tables continuously while it runs.
+
 
 ## Usage instructions
-TBC
+
+Once installation is complete, the pipeline can be used as follows:
+
+- [Send data to Kafka via REST API](#send-data-to-kafka-via-rest-api)
+
+- [Run batch analysis with Airflow](#schedule-batch-analysis-with-airflow)
+
+- [Send data to Kinesis via REST API](#send-data-to-kinesis-via-rest-api)
+
+- [Read and analyse streaming data real time on Databricks](#read-and-analyse-streaming-data-in-pyspark-on-databricks)
+
 
 ## File structure
 
@@ -418,6 +430,7 @@ TBC
 │   ├── analyse_pinterest_data_batch.ipynb
 │   ├── analyse_pinterest_data_streaming.ipynb
 │   └── mount_s3_bucket.ipynb
+├── LICENSE
 ├── mwaa
 │   └── 0ec858bf1407_dag.py
 ├── posting_emulation
@@ -426,7 +439,6 @@ TBC
 │   ├── user_posting_emulation.py
 │   └── user_posting_emulation_streaming.py
 └── README.md
-
 ```
 
 ## License information
