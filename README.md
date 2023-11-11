@@ -8,7 +8,7 @@
 1. [Installation instructions](#installation-instructions)
 
     
-    - [Set up Kafka client machine](#set-up-kafka-client)
+    - [Set up Kafka client](#set-up-kafka-client)
 
     - [Connect Pinterest MSK Cluster to an S3 Bucket](#connect-pinterest-msk-cluster-to-an-s3-bucket)
 
@@ -411,7 +411,7 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
 
 ### Read and analyse streaming data in PySpark on Databricks
 
-1. Log into Databricks using the credentials provided, and run the notebook __databricks/analyse_pinterest_data_streaming_.ipynb__ on Databricks. This will read from each of the three Kinesis Data Streams, clean the data (applying the transformations described [here](#read-and-analyse-batch-data-in-pyspark-on-databricks)), and write the transformed data to the following delta tables:
+1. Log into Databricks using the credentials provided, and run the notebook __databricks/analyse_pinterest_data_streaming.ipynb__ on Databricks. This will read from each of the three Kinesis Data Streams, clean the data (applying the transformations described [here](#read-and-analyse-batch-data-in-pyspark-on-databricks)), and write the transformed data to the following delta tables:
 
     - __<user_id>\_geo_table__
     - __<user_id>\_pin_table__
@@ -426,7 +426,7 @@ Once installation is complete, the pipeline can be used as follows:
 
 - [Send data to Kafka via REST API](#send-data-to-kafka-via-rest-api)
 
-- [Run batch analysis with Airflow](#schedule-batch-analysis-with-airflow)
+- Run [batch analysis](#read-and-analyse-batch-data-in-pyspark-on-databricks) with [Airflow](#schedule-batch-analysis-with-airflow)
 
 - [Send data to Kinesis via REST API](#send-data-to-kinesis-via-rest-api)
 
