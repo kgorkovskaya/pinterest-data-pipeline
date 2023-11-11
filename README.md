@@ -37,6 +37,16 @@
 
 This project is the Pinterest Data Pipeline for AiCore, aiming to replicate Pinterest's data analytics infrastructure using AWS Cloud tools.
 
+There are two components to the workflow, as illustrated in the below diagram.
+
+![workflow diagram](workflow_diagram.png)
+
+For both the batch and streaming worfklows, a Python script is executed to post a continuous stream of data to a REST API. 
+
+For the batch worfklow, the REST API sends data to Kafka topics on an EC2 Kafka client machine. The Kafka cluster is connected to an S3 bucket via a Confluent.io connector; which means all all data sent to the Kafka topics is written to S3. The S3 bucket is mounted to DataBricks, which allows the data to be analysed in Databricks via PySpark. Finally, the Databricks analysis is scheduled via Airflow to run once per day.
+
+For the streaming workflow, the REST API sends data to Kinesis. The streaming data is analysed in real time via PySpark, and written to delta tables on Databricks.
+
 ## Installation Instructions
 
 To set up the Pinterest Data Pipeline, follow these steps:
