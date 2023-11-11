@@ -236,20 +236,20 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
     - If the above steps were executed correctly, data sent to the API will be stored in the S3 bucket.
 
 
-1. Run the notebook __databricks/analyse_pinterest_data_batch_.ipynb__ on Databricks, to load data from the mounted S3 bucket into PySpark DataFrames, clean and analyse the data. The following analysis is performed.
+1. Run the notebook __databricks/analyse_pinterest_data_batch.ipynb__ on Databricks, to load data from the mounted S3 bucket into PySpark DataFrames, clean and analyse the data. The following analysis is performed.
     
     - Clean the DataFrame that contains information about Pinterest posts. Perform the following transformations:
         - Replace empty entries and entries with no relevant data in each column with Nones
-        - Perform the necessary transformations on the follower_count to ensure every entry is a number. Make sure the data type of this column is an int.
+        - Perform the necessary transformations on the follower_count to ensure every entry is a number. Make sure the data type of this column is an int
         - Ensure that each column containing numeric data has a numeric data type
         - Clean the data in the save_location column to include only the save location path
         - Rename the index column to ind.
         - Reorder the DataFrame columns to have the following column order: ind, unique_id, title, description, follower_count, poster_name, tag_list, is_image_or_video, image_src, save_location, category
         
     - Clean the DataFrame that contains information about geolocation. Perform the following transformations:
-        - Create a new column coordinates that contains an array based on the latitude and longitude columns.
+        - Create a new column coordinates that contains an array based on the latitude and longitude columns
         - Drop the latitude and longitude columns from the DataFrame.
-        - Convert the timestamp column from a string to a timestamp data type.
+        - Convert the timestamp column from a string to a timestamp data type
         - Reorder the DataFrame columns to have the following column order: ind, country, coordinates, timestamp
 
     - Clean the DataFrame that contains information about users. Perform the following transformations:
@@ -259,12 +259,12 @@ Create a REST API and integrate the API with the Kafka client (EC2 machine creat
         - Reorder the DataFrame columns to have the following column order: ind, user_name, age, date_joined
 
     - Analyse the data. Find the following:
-        - The most popular category in each country.
-        - The most popular category for each year, between 2018 and 2022.
-        - The user with the most followers in each country, and the country with the user with the most followers.
-        - The median follower count by age group.
-        - The number of users who joined each year between 2015 and 2020.
-        - The median follower count of all users, grouped by joining year.
+        - The most popular category in each country
+        - The most popular category for each year, between 2018 and 2022
+        - The user with the most followers in each country, and the country with the user with the most followers
+        - The median follower count by age group
+        - The number of users who joined each year between 2015 and 2020
+        - The median follower count of all users, grouped by joining year
         - The median follower count of all users, grouped by joining year and age group.
 
 
@@ -274,7 +274,7 @@ Use Airflow to automatically run the Databricks notebook __databricks/analyse_pi
 
 1. Define a DAG (Directed Acyclic Graph) to run the notebook daily, and upload the Python file containing the DAG to MWAA (Managed Workflows for Apache Airflow) in AWS. The DAG used for this project can be found here: __mwaa/0ec858bf1407_dag.py__ 
 
-    - NB: The student account has been provided with access to an MWAA environment (__Databricks-Airflow-Env__) and to the S3 bucket associated with the environment (__mwaa-dags-bucket__). Therefore, in this instance,there is no need to create an API token in Databricks to connect to the AWS account, set up the MWAA-Databricks connection, or create the requirements.txt file. Simply create a DAG file named <user_id>_dag.py and upload it to the bucket. Note that the DAG inside the file must be named <user_id>_dag.
+    - NB: The student account has been provided with access to an MWAA environment (__Databricks-Airflow-Env__) and to the S3 bucket associated with the environment (__mwaa-dags-bucket__). Therefore, in this instance, there is no need to create an API token in Databricks to connect to the AWS account, set up the MWAA-Databricks connection, or create the requirements.txt file. Simply create a DAG file named <user_id>_dag.py and upload it to the bucket. Note that the DAG inside the file must be named <user_id>_dag.
 
     - A note on parameters:
         - __existing_cluster_id__ can be found by selecting the Pinterest cluster in Databricks, opening the Configuration tab, and switching the UI to JSON.
