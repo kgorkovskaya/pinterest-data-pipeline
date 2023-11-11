@@ -1,5 +1,5 @@
 
-# Pinterest Data Pipieline
+# Pinterest Data Pipeline
 
 ## Table of contents
 
