@@ -1,7 +1,7 @@
 '''
 Classes for use in User Posting Emulation scripts, for Pinterest Data Pipeline project (AiCore).
 Author: Kristina Gorkovskaya
-Date: 2023-11-10
+Date: 2023-11-24
 '''
 
 
@@ -80,13 +80,21 @@ class PostingEmulation(ABC):
 
     @abstractmethod    
     def post(self, payload: dict, table_alias: str) -> None:
-        '''Post a single record (row of data) to the specified API endpoint.'''
+        '''Post a single record (row of data) to the specified API endpoint.
+        Attributes:
+            payload (dict): payload (dict): row of data to be posted (dictionary keys = column names)
+            table_alias (str): alias of target table (this will be used to construct the endpoint URL)
+        '''
+
         raise NotImplementedError
     
 
     @staticmethod
     def clean_payload(payload: dict) -> dict:
-        '''Prepare data for posting; format datetimes as string to ensure data can be serialized.'''
+        '''Prepare data for posting; format datetimes as string to ensure data can be serialized.
+        Attributes:
+            payload (dict): row of data to be posted (dictionary keys = column names)
+        '''
 
         print(payload)
         for k, v in payload.items():

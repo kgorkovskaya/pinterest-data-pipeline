@@ -21,7 +21,13 @@ class PostingEmulationMSK(PostingEmulation):
     '''
 
     def __init__(self):
-        '''See help(PostingEmulationMSK) for accurate signature.'''
+        '''See help(PostingEmulationMSK) for accurate signature.
+        Attributes:
+            db_connector (AWSDBConnector): connection to Pinterest database
+            invoke_url (str): partial API endpoint URL
+            table_mapping (dict): maps table names to aliases which will be used to construct the API endpoint URL 
+            user_id (str): AWS IAM User ID; this will be used to construct the API endpoint URL
+        '''
 
         super().__init__()
         self.user_id = '0ec858bf1407'

@@ -4,7 +4,7 @@ Runs an infinite loop to select one record of Pinterest data at a time
 from RDS, and post to Kinesis Data Streams.
 
 Author: Kristina Gorkovskaya
-Date: 2023-11-10
+Date: 2023-11-24
 '''
 
 import json
@@ -19,6 +19,12 @@ class PostingEmulationKinesis(PostingEmulation):
     This class connects to an AWS RDS database containing Pinterest data, then runs an 
     infinite loop to select one random row at a time from specified RDS tables and post each row to 
     the appropriate Kinesis Data Stream for that table, via a REST API.
+    Attributes:
+        db_connector (AWSDBConnector): connection to Pinterest database
+        invoke_url (str): partial API endpoint URL
+        table_mapping (dict): maps table names to aliases which will be used to construct the API endpoint URL 
+        user_id (str): AWS IAM User ID; this will be used to construct the API endpoint URL
+        num_partitions (int): number of shards in the stream; determines how data will be split when posting.
     '''
 
     def __init__(self, num_shards: int = 4):
@@ -28,6 +34,7 @@ class PostingEmulationKinesis(PostingEmulation):
         self.user_id = '0ec858bf1407'
         self.invoke_url = 'https://broydqcmtd.execute-api.us-east-1.amazonaws.com/test/streams/record?stream-name=streaming-{}-{}'
         self.num_partitions = max(num_shards, 1)
+
 
     def post(self, payload: dict, table_alias: str) -> None:
         '''Post a single record (row of data) to the specified Kinesis Data String via REST API.'''
