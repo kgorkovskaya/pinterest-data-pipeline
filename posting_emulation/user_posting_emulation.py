@@ -35,7 +35,11 @@ class PostingEmulationMSK(PostingEmulation):
         
                         
     def post(self, payload: dict, table_alias: str) -> None:
-        '''Post a single record (row of data) to the specified Kafka topic via REST API.'''
+        '''Post a single record (row of data) to the specified Kafka topic via REST API.
+        Attributes:
+            payload (dict): payload (dict): row of data to be posted (dictionary keys = column names)
+            table_alias (str): alias of target table (this will be used to construct the endpoint URL)
+        '''
 
         # Get endpoint URL for the specified topic
         endpoint_url = self.invoke_url.format(self.user_id, table_alias)
