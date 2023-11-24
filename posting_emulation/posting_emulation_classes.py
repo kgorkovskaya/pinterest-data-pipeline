@@ -105,8 +105,7 @@ class PostingEmulation(ABC):
 
     def run_infinite_post_data_loop(self) -> None:
         '''
-        Run infinite loop to select a random row from each in-scope 
-        RDS table, then post that row to the API.
+        Run infinite loop to select a random row from each in-scope RDS table, then post that row to the API.
         '''
         
         engine = self.db_connector.create_db_connector()
