@@ -6,8 +6,7 @@
 1. [Description](#description)
 
 1. [Installation instructions](#installation-instructions)
-
-    
+ 
     - [Set up Kafka client](#set-up-kafka-client)
 
     - [Connect Pinterest MSK Cluster to an S3 Bucket](#connect-pinterest-msk-cluster-to-an-s3-bucket)
@@ -439,7 +438,8 @@ Once installation is complete, the pipeline can be used as follows:
 ├── databricks
 │   ├── analyse_pinterest_data_batch.ipynb
 │   ├── analyse_pinterest_data_streaming.ipynb
-│   └── mount_s3_bucket.ipynb
+│   ├── mount_s3_bucket.ipynb
+│   └── schemas.ipynb
 ├── LICENSE
 ├── mwaa
 │   └── 0ec858bf1407_dag.py
